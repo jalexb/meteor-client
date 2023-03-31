@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
+import com.google.gson.Gson
 import dev.hoot.api.events.AutomatedMenu
 import dev.hoot.api.game.GameThread
 import eventbus.Events
@@ -19,6 +20,8 @@ import eventbus.events.ClickPacket
 import eventbus.events.ConfigChanged
 import eventbus.events.GameTick
 import eventbus.events.MenuOptionClicked
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import meteor.Configuration.EXTERNALS_DIR
 import meteor.api.loot.Interact
 import meteor.api.ClientPackets
@@ -52,17 +55,20 @@ import net.runelite.api.*
 import net.runelite.api.hooks.Callbacks
 import meteor.chat.ChatCommandManager
 import meteor.chat.ChatMessageManager
+import meteor.plugins.privateserver.PrivateServerConfig
 import meteor.rmi.handshake.HandshakeService
 import meteor.rmi.handshake.HandshakeClient
 import meteor.ui.composables.preferences.uiColor
 import net.runelite.client.plugins.gpu.GpuPlugin
 import net.runelite.http.api.chat.ChatClient
 import net.runelite.http.api.xp.XpClient
+import net.runelite.rs.api.RSClient
 import okhttp3.OkHttpClient
 import org.apache.commons.lang3.time.StopWatch
 import org.jetbrains.skiko.OS
 import org.rationalityfrontline.kevent.KEVENT
 import rs117.hd.HdPlugin
+import java.math.BigInteger
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
@@ -72,14 +78,17 @@ import org.rationalityfrontline.kevent.KEVENT as EventBus
 
 object Main : ApplicationScope, EventSubscriber() {
     var meteorConfig: MeteorConfig
+    var rspsConfig: PrivateServerConfig
     init {
         // load configs immediately
         ConfigManager.loadSavedProperties()
         ConfigManager.setDefaultConfiguration(MeteorConfig::class, false)
+        ConfigManager.setDefaultConfiguration(PrivateServerConfiguration::class, false)
         ConfigManager.saveProperties()
 
         // init meteor config
         meteorConfig = ConfigManager.getConfig(MeteorConfig::class.java)!!
+        rspsConfig = ConfigManager.getConfig(PrivateServerConfig::class.java)!!
     }
 
     private val startupTimer = StopWatch()
@@ -108,6 +117,7 @@ object Main : ApplicationScope, EventSubscriber() {
     val hiscoreManager = HiscoreManager
     val rmiHost = "15.204.174.14"
     val handshakeClient = HandshakeClient<HandshakeService>()
+    lateinit var applet: Applet
 
     // onClick listeners
     var onClicks = HashMap<MenuEntry, Consumer<MenuEntry>>()
@@ -144,7 +154,8 @@ object Main : ApplicationScope, EventSubscriber() {
         startupTimer.start()
         callbacks = Hooks()
         AppletConfiguration.init()
-        Applet().init()
+        applet = Applet()
+        applet.init()
         initWindow()
         // finishStartup is ran here after windowContent()
     }
@@ -227,10 +238,21 @@ object Main : ApplicationScope, EventSubscriber() {
         )
     }
 
+    fun initRSPSConfig() {
+        try {
+            if (rspsConfig.host().isNotEmpty()) {
+                client.setHost(rspsConfig.host())
+
+                if (rspsConfig.modulus().isNotEmpty())
+                    client.modulus = BigInteger(rspsConfig.modulus(), 16)
+            }
+        } catch (_: Exception) {}
+    }
 
     fun finishStartup() {
         client = Applet.asClient(Applet.applet)
         client.callbacks = callbacks
+        initRSPSConfig()
         WidgetInspector
         initApi()
         initOverlays()
@@ -246,13 +268,20 @@ object Main : ApplicationScope, EventSubscriber() {
         SessionManager.start()
         startupTimer.stop()
 
-
-        if (meteorConfig.authKey().isNotEmpty()) {
-            rmiPingTimer.start()
-            val response = handshakeClient.connect().handshake(meteorConfig.authKey())
-            rmiPingTimer.stop()
-            logger.debug(response)
-            logger.debug("RMI round-trip - ${rmiPingTimer.getTime(TimeUnit.MILLISECONDS)}ms")
+        GlobalScope.launch {
+            // Auth on separate thread (prevent lockup on failure)
+            if (meteorConfig.authKey().isNotEmpty()) {
+                rmiPingTimer.start()
+                try {
+                    val response = handshakeClient.connect().handshake(meteorConfig.authKey())
+                    rmiPingTimer.stop()
+                    logger.debug(response)
+                    logger.debug("RMI round-trip - ${rmiPingTimer.getTime(TimeUnit.MILLISECONDS)}ms")
+                } catch (e: Exception) {
+                    println("Meteor RMI handshake failure")
+                    e.printStackTrace()
+                }
+            }
         }
 
         logger.debug("Meteor started in ${startupTimer.getTime(TimeUnit.MILLISECONDS)}ms")

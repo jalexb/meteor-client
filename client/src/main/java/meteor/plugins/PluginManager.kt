@@ -95,6 +95,7 @@ import meteor.plugins.playeroutline.PlayerOutlinePlugin
 import meteor.plugins.poison.PoisonPlugin
 import meteor.plugins.prayerflicker.PrayerFlickerPlugin
 import meteor.plugins.prayerpotdrinker.PrayerPotDrinker
+import meteor.plugins.privateserver.PrivateServerPlugin
 import meteor.plugins.pvpkeys.PvPKeys
 import meteor.plugins.reportbutton.ReportButtonPlugin
 import meteor.plugins.rsnhider.RsnHiderPlugin
@@ -102,6 +103,7 @@ import meteor.plugins.runepouch.RunepouchPlugin
 import meteor.plugins.specbar.SpecBarPlugin
 import meteor.plugins.statusbars.StatusBarsPlugin
 import meteor.plugins.stretchedmode.StretchedModePlugin
+import meteor.plugins.thralls.ThrallsPlugin
 import meteor.plugins.tileindicators.TileIndicatorsPlugin
 import meteor.plugins.virtuallevels.VirtualLevelsPlugin
 import meteor.plugins.winemaker.WineMakerPlugin
@@ -114,8 +116,8 @@ import net.runelite.client.plugins.cannon.CannonPlugin
 import net.runelite.client.plugins.chatcommands.ChatCommandsPlugin
 import net.runelite.client.plugins.cluescrolls.ClueScrollPlugin
 import net.runelite.client.plugins.devtools.DevToolsPlugin
-import net.runelite.client.plugins.externals.leftclickcast.LeftClickCast
-import net.runelite.client.plugins.externals.oneclick.OneClick
+//import net.runelite.client.plugins.externals.leftclickcast.LeftClickCast
+//import net.runelite.client.plugins.externals.oneclick.OneClick
 import net.runelite.client.plugins.gpu.GpuPlugin
 import net.runelite.client.plugins.grounditems.GroundItemsPlugin
 import net.runelite.client.plugins.herbiboars.HerbiboarPlugin
@@ -230,7 +232,7 @@ object PluginManager {
             init<KebabBuyerPlugin>()
             init<KeyRemappingPlugin>()
             init<KourendLibraryPlugin>()
-            init<LeftClickCast>()
+            //init<LeftClickCast>()
             init<LogChopper>()
             init<LootTrackerPlugin>()
             init<LowDetailPlugin>()
@@ -249,7 +251,7 @@ object PluginManager {
             init<NightmareHelper>()
             init<ObjectHiderPlugin>()
             init<ObjectIndicatorsPlugin>()
-            init<OneClick>()
+            //init<OneClick>()
             init<OneClick3t4g>()
             init<OneClick3TFishPlugin>()
             init<OneClickAerialFishingPlugin>()
@@ -265,6 +267,7 @@ object PluginManager {
             init<PestControlPlugin>()
             init<PlayerOutlinePlugin>()
             init<PoisonPlugin>()
+            init<PrivateServerPlugin>()
             init<PuzzleSolverPlugin>()
             init<PvPKeys>()
             init<PrayerFlickerPlugin>()
@@ -279,6 +282,7 @@ object PluginManager {
             init<StretchedModePlugin>()
             init<TileIndicatorsPlugin>()
             init<TilemanModePlugin>()
+            init<ThrallsPlugin>()
             init<TimersPlugin>()
             init<TimestampPlugin>()
             init<TithePlugin>()

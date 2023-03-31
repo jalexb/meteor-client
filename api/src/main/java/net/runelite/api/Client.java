@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 import dev.hoot.api.MouseHandler;
 import dev.hoot.api.events.AutomatedMenu;
 import meteor.Logger;
+import meteor.PrivateServerConfiguration;
 import net.runelite.api.annotations.VarCInt;
 import net.runelite.api.annotations.Varbit;
 import net.runelite.api.packets.ClientPacket;
@@ -2003,31 +2004,9 @@ public interface Client extends GameEngine
 	void checkClickbox(Model model, int orientation, int pitchSin, int pitchCos, int yawSin, int yawCos, int x, int y, int z, long hash);
 
 	/**
-	 * Get the if1 widget whose item is being dragged
-	 */
-	Widget getIf1DraggedWidget();
-
-	/**
-	 * Get the item index of the item being dragged on an if1 widget
-	 */
-	int getIf1DraggedItemIndex();
-
-	/**
 	 * Sets if a widget is in target mode
 	 */
 	void setSpellSelected(boolean selected);
-
-	/**
-	 * @deprecated use {@link #getSelectedWidget()} instead.
-	 */
-	@Deprecated
-	int getSelectedItem();
-
-	/**
-	 * @deprecated use {@link #getSelectedSpellChildIndex()} instead.
-	 */
-	@Deprecated
-	int getSelectedItemIndex();
 
 	/**
 	 * Get the selected widget, such as a selected spell or selected item (eg. "Use")
@@ -2077,13 +2056,7 @@ public interface Client extends GameEngine
 
 	void setPrintMenuActions(boolean b);
 
-	String getSelectedSpellName();
-
-	void setSelectedSpellName(String name);
-
 	boolean getSpellSelected();
-
-	String getSelectedSpellActionName();
 
 	int getSelectedSpellFlags();
 
@@ -2136,7 +2109,7 @@ public interface Client extends GameEngine
 	/**
 	 * Remove player from ignorelist
 	 */
-	void removeIgnore(String name);
+	void removeIgnore(String name, boolean confirmToJagex);
 
 	void setModulus(BigInteger modulus);
 
@@ -2148,36 +2121,6 @@ public interface Client extends GameEngine
 	int getItemCount();
 
 	void setAllWidgetsAreOpTargetable(boolean value);
-
-	/**
-	 * @deprecated use {@link #setSelectedSpellItemId(int)} instead.
-	 */
-	@Deprecated
-	void setSelectedItemID(int id);
-
-	/**
-	 * @deprecated use {@link #getSelectedSpellWidget()} instead.
-	 */
-	@Deprecated
-	int getSelectedItemWidget();
-
-	/**
-	 * @deprecated use {@link #setSelectedSpellWidget(int)} instead.
-	 */
-	@Deprecated
-	void setSelectedItemWidget(int widgetID);
-
-	/**
-	 * @deprecated use {@link #getSelectedSpellChildIndex()} instead.
-	 */
-	@Deprecated
-	int getSelectedItemSlot();
-
-	/**
-	 * @deprecated use {@link #setSelectedSpellChildIndex(int)} instead.
-	 */
-	@Deprecated
-	void setSelectedItemSlot(int idx);
 
 	int getSelectedSpellWidget();
 
@@ -2289,8 +2232,6 @@ public interface Client extends GameEngine
 	int getFollowerIndex();
 
 	int isItemSelected();
-
-	String getSelectedItemName();
 
 	Widget getMessageContinueWidget();
 
@@ -2544,8 +2485,6 @@ public interface Client extends GameEngine
 
 	Instant getLastInteractionTime();
 
-	int getSelectedItemID();
-
 	int getTmpMenuOptionsCount();
 	void setTmpMenuOptionsCount(int i);
 
@@ -2615,4 +2554,6 @@ public interface Client extends GameEngine
 	PacketBufferNode getPacketOverride();
 
 	void setPacketOverride(PacketBufferNode packetOverride);
+
+	void setHost(String host);
 }
